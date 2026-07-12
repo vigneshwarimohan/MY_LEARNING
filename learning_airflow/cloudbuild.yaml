@@ -1,0 +1,10 @@
+steps:
+- name: 'gcr.io/google.com/cloudsdktool/cloudsdk'
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+    gsutil -m rsync -r dags gs://us-central1-learning-compos-6c8a22d5-bucket/dags
+    gsutil -m rsync -r scripts gs://us-central1-learning-compos-6c8a22d5-bucket/scripts
+    gsutil -m rsync -r sql gs://us-central1-learning-compos-6c8a22d5-bucket/sql
+    gsutil -m rsync requirements.txt gs://YOUR_COMPOSER_BUCKET/requirements.txt
