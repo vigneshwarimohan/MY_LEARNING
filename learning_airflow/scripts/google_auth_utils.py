@@ -3,6 +3,9 @@ import os
 from pathlib import Path
 from typing import Any, Tuple
 
+import google.auth
+from google.oauth2.service_account import Credentials
+
 
 def _read_json_file(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as handle:
@@ -54,3 +57,19 @@ def load_service_account_info() -> Tuple[dict[str, Any], str]:
         "3. credentials/service_account.json\n"
         "4. GCP_PROJECT_ID and GOOGLE_SECRET_NAME for Secret Manager"
     )
+
+
+def load_google_credentials(scopes: list[str]) -> tuple[Any, str, str | None]:
+    try:
+        service_account_info, source = load_service_account_info()
+        credentials = Credentials.from_service_account_info(service_account_info, scopes=scopes)
+        project_id = (
+            os.getenv("GCP_PROJECT_ID")
+            or os.getenv("GOOGLE_CLOUD_PROJECT")
+            or service_account_info.get("project_id")
+        )
+        return credentials, source, project_id
+    except FileNotFoundError:
+        credentials, detected_project_id = google.auth.default(scopes=scopes)
+        project_id = os.getenv("GCP_PROJECT_ID") or os.getenv("GOOGLE_CLOUD_PROJECT") or detected_project_id
+        return credentials, "Application Default Credentials", project_id

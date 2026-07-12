@@ -5,7 +5,6 @@ from pathlib import Path
 try:
     import gspread
     from gspread.exceptions import SpreadsheetNotFound
-    from google.oauth2.service_account import Credentials
     from google.cloud import bigquery
 except ImportError:
     raise RuntimeError(
@@ -13,29 +12,22 @@ except ImportError:
         "Example: pip install gspread google-auth google-cloud-bigquery google-cloud-secret-manager"
     )
 
-from google_auth_utils import load_service_account_info
+from google_auth_utils import load_google_credentials
 
 DATASET = os.getenv("BQ_DATASET", "learning_dataset")
 TABLE = os.getenv("BQ_TABLE", "learning_sample_table")
 SPREADSHEET_NAME = os.getenv("LEARNING_GSHEET_NAME", "Learning ETL Sheet")
 OUTPUT_CSV = Path(__file__).resolve().parents[1] / "datasets" / "learning_bq_data.csv"
 
-service_account_info, source = load_service_account_info()
-print(f"Using credentials from: {source}")
-
-PROJECT_ID = (
-    os.getenv("GCP_PROJECT_ID")
-    or os.getenv("GOOGLE_CLOUD_PROJECT")
-    or service_account_info.get("project_id")
-    or "your-project-id"
-)
-
 scopes = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive",
     "https://www.googleapis.com/auth/bigquery",
 ]
-credentials = Credentials.from_service_account_info(service_account_info, scopes=scopes)
+credentials, source, detected_project = load_google_credentials(scopes)
+print(f"Using credentials from: {source}")
+
+PROJECT_ID = os.getenv("GCP_PROJECT_ID") or os.getenv("GOOGLE_CLOUD_PROJECT") or detected_project or "your-project-id"
 
 bq_client = bigquery.Client(project=PROJECT_ID, credentials=credentials)
 query = f"SELECT * FROM `{PROJECT_ID}.{DATASET}.{TABLE}` LIMIT 100"

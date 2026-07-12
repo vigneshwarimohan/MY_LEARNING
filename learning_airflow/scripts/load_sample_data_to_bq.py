@@ -3,30 +3,23 @@ from pathlib import Path
 
 try:
     from google.cloud import bigquery
-    from google.oauth2.service_account import Credentials
 except ImportError:
     raise RuntimeError(
         "Please install google-cloud-bigquery and google-auth. Example: pip install google-cloud-bigquery google-auth"
     )
 
-from google_auth_utils import load_service_account_info
+from google_auth_utils import load_google_credentials
 
 DATASET = os.getenv("BQ_DATASET", "learning_dataset")
 TABLE = os.getenv("BQ_TABLE", "learning_sample_table")
 SQL_FILE = Path(__file__).resolve().parents[1] / "sql" / "load_sample_bq_table.sql"
 
-service_account_info, source = load_service_account_info()
+scopes = ["https://www.googleapis.com/auth/bigquery"]
+credentials, source, detected_project = load_google_credentials(scopes)
 print(f"Using credentials from: {source}")
 
-PROJECT_ID = (
-    os.getenv("GCP_PROJECT_ID")
-    or os.getenv("GOOGLE_CLOUD_PROJECT")
-    or service_account_info.get("project_id")
-    or "your-project-id"
-)
+PROJECT_ID = os.getenv("GCP_PROJECT_ID") or os.getenv("GOOGLE_CLOUD_PROJECT") or detected_project or "your-project-id"
 
-scopes = ["https://www.googleapis.com/auth/bigquery"]
-credentials = Credentials.from_service_account_info(service_account_info, scopes=scopes)
 client = bigquery.Client(project=PROJECT_ID, credentials=credentials)
 
 
