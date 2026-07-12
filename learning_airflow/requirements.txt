@@ -1,0 +1,5 @@
+apache-airflow>=2.10.5
+gspread>=5.0.0
+google-auth>=2.0.0
+google-cloud-secret-manager>=2.0.0
+google-cloud-bigquery>=3.11.0
