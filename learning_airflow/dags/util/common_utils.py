@@ -28,10 +28,12 @@ def create_start_sensor(dag, hour: int = 7, minute: int = 0):
 
 
 def run_python_script(script_name: str):
-    project_root = Path(__file__).resolve().parents[2]
-    script_path = project_root / "scripts" / script_name
+    dag_root = Path(__file__).resolve().parents[1]
+    script_dir = dag_root / "scripts"
+    script_path = script_dir / script_name
     env = os.environ.copy()
     existing_pythonpath = env.get("PYTHONPATH", "")
-    env["PYTHONPATH"] = str(project_root) + (os.pathsep + existing_pythonpath if existing_pythonpath else "")
+    extra_paths = os.pathsep.join([str(dag_root), str(script_dir)])
+    env["PYTHONPATH"] = extra_paths + (os.pathsep + existing_pythonpath if existing_pythonpath else "")
 
-    subprocess.run([sys.executable, str(script_path)], check=True, cwd=str(project_root), env=env)
+    subprocess.run([sys.executable, str(script_path)], check=True, cwd=str(dag_root), env=env)
