@@ -35,5 +35,12 @@ def run_python_script(script_name: str):
     existing_pythonpath = env.get("PYTHONPATH", "")
     extra_paths = os.pathsep.join([str(dag_root), str(script_dir)])
     env["PYTHONPATH"] = extra_paths + (os.pathsep + existing_pythonpath if existing_pythonpath else "")
+    command = [sys.executable, str(script_path)]
+    print(f"Running script command: {command}")
+    print(f"Working directory: {dag_root}")
+    print(f"PYTHONPATH: {env['PYTHONPATH']}")
 
-    subprocess.run([sys.executable, str(script_path)], check=True, cwd=str(dag_root), env=env)
+    try:
+        subprocess.run(command, check=True, cwd=str(dag_root), env=env)
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(f"Script failed: {script_name} exited with code {exc.returncode}") from exc
