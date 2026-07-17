@@ -12,6 +12,6 @@ SELECT * FROM UNNEST([
   STRUCT(7 AS id, 'Product 7' AS name, 'Learning' AS category, 17.0 AS price),
   STRUCT(8 AS id, 'Product 8' AS name, 'Learning' AS category, 18.0 AS price),
   STRUCT(9 AS id, 'Product 9' AS name, 'Learning' AS category, 19.0 AS price),
-  STRUCT(10 AS id, 'Product 10' AS name, 'Learning' AS category, 20.0 AS price)
+  STRUCT(10 AS id, 'Product 10' AS name, 'Learning' AS category, 20.0 AS price),
   STRUCT(11 AS id, 'Product 11' AS name, 'Learning' AS category, 50.0 AS price)
 ]);
